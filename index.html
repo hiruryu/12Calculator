@@ -75,12 +75,18 @@
     }
     // 10進数 → 12進文字
     function toBase12(num) {
-      if (!Number.isFinite(num)) return 'NaN';
-      let neg = num < 0;
-      num = Math.abs(num);
-      let s = num.toString(12).toUpperCase().replace(/10/g, 'A').replace(/11/g, 'B');
-      return neg ? '-' + s : s;
-    }
+  if (!Number.isFinite(num)) return 'NaN';
+  let neg = num < 0;
+  num = Math.abs(Math.floor(num)); // 小数対策
+  if (num === 0) return '0';
+  let digits = '';
+  while (num > 0) {
+    let rem = num % 12;
+    digits = (rem < 10 ? rem : String.fromCharCode(55 + rem)) + digits;
+    num = Math.floor(num / 12);
+  }
+  return neg ? '-' + digits : digits;
+}
 
     const xEl = document.getElementById('x');
     const yEl = document.getElementById('y');
