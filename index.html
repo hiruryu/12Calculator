@@ -74,18 +74,37 @@
       return parseInt(str.trim().toUpperCase().replace(/B/g, '11'), 12);
     }
     // 10進数 → 12進文字
-    function toBase12(num) {
+    function toBase12(num, precision = 10) {
   if (!Number.isFinite(num)) return 'NaN';
   let neg = num < 0;
-  num = Math.abs(Math.floor(num)); // 小数対策
-  if (num === 0) return '0';
-  let digits = '';
-  while (num > 0) {
-    let rem = num % 12;
-    digits = (rem < 10 ? rem : String.fromCharCode(55 + rem)) + digits;
-    num = Math.floor(num / 12);
+  num = Math.abs(num);
+  let intPart = Math.floor(num);
+  let fracPart = num - intPart;
+
+  // 整数部の変換
+  let intStr = '';
+  if (intPart === 0) {
+    intStr = '0';
+  } else {
+    while (intPart > 0) {
+      let rem = intPart % 12;
+      intStr = (rem < 10 ? rem : String.fromCharCode(55 + rem)) + intStr;
+      intPart = Math.floor(intPart / 12);
+    }
   }
-  return neg ? '-' + digits : digits;
+
+  // 小数部の変換
+  let fracStr = '';
+  let count = 0;
+  while (fracPart > 0 && count < precision) {
+    fracPart *= 12;
+    let digit = Math.floor(fracPart);
+    fracStr += digit < 10 ? digit : String.fromCharCode(55 + digit);
+    fracPart -= digit;
+    count++;
+  }
+
+  return neg ? '-' + intStr + (fracStr ? '.' + fracStr : '') : intStr + (fracStr ? '.' + fracStr : '');
 }
 
     const xEl = document.getElementById('x');
