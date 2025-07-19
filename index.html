@@ -71,8 +71,30 @@
   <script>
     // 12進文字 → 10進数
     function parseBase12(str) {
-      return parseInt(str.trim().toUpperCase().replace(/B/g, '11'), 12);
-    }
+  str = str.trim().toUpperCase();
+  const [intPart, fracPart = ""] = str.split(".");
+
+  const digitToValue = (ch) =>
+    "0123456789AB".indexOf(ch);
+
+  // 整数部
+  let intVal = 0;
+  for (let i = 0; i < intPart.length; i++) {
+    const v = digitToValue(intPart[intPart.length - 1 - i]);
+    if (v < 0) return NaN;
+    intVal += v * Math.pow(12, i);
+  }
+
+  // 小数部
+  let fracVal = 0;
+  for (let i = 0; i < fracPart.length; i++) {
+    const v = digitToValue(fracPart[i]);
+    if (v < 0) return NaN;
+    fracVal += v / Math.pow(12, i + 1);
+  }
+
+  return intVal + fracVal;
+}
     // 10進数 → 12進文字
     function toBase12(num, precision = 10) {
   if (!Number.isFinite(num)) return 'NaN';
