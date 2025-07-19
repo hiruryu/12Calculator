@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Base-12 Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+    }
+    .row {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    input, select, button {
+      font-size: 1.2em;
+      padding: 8px;
+      margin-right: 5px;
+      flex: 1;
+    }
+    button {
+      flex: none;
+      cursor: pointer;
+    }
+    #history {
+      margin-top: 20px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9em;
+    }
+    .entry {
+      margin-bottom: 5px;
+    }
+    .copy-btn {
+      margin-left: 5px;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+  <h1>12進数電卓</h1>
+  <div class="row">
+    <input id="x" placeholder="数値1 (例: A3B)" />
+    <select id="op">
+      <option value="+">+</option>
+      <option value="-">−</option>
+      <option value="*">×</option>
+      <option value="/">÷</option>
+    </select>
+    <input id="y" placeholder="数値2 (例: 7B)" />
+  </div>
+  <div class="row">
+    <button id="calc">計算する</button>
+    <button id="clear">クリア</button>
+  </div>
+  <div class="row">
+    <input id="result" placeholder="結果" readonly />
+    <button class="copy-btn" id="copy">コピー</button>
+  </div>
+  <div id="history"></div>
+
+  <script>
+    // 12進文字 → 10進数
+    function parseBase12(str) {
+      return parseInt(str.trim().toUpperCase().replace(/B/g, '11'), 12);
+    }
+    // 10進数 → 12進文字
+    function toBase12(num) {
+      if (!Number.isFinite(num)) return 'NaN';
+      let neg = num < 0;
+      num = Math.abs(num);
+      let s = num.toString(12).toUpperCase().replace(/10/g, 'A').replace(/11/g, 'B');
+      return neg ? '-' + s : s;
+    }
+
+    const xEl = document.getElementById('x');
+    const yEl = document.getElementById('y');
+    const opEl = document.getElementById('op');
+    const resEl = document.getElementById('result');
+    const histEl = document.getElementById('history');
+
+    document.getElementById('calc').addEventListener('click', () => {
+      const xs = xEl.value, ys = yEl.value, op = opEl.value;
+      let a = parseBase12(xs), b = parseBase12(ys), raw;
+      if (isNaN(a) || isNaN(b)) {
+        resEl.value = '入力エラー';
+        return;
+      }
+      switch(op) {
+        case '+': raw = a + b; break;
+        case '-': raw = a - b; break;
+        case '*': raw = a * b; break;
+        case '/': raw = b === 0 ? NaN : a / b; break;
+      }
+      const out12 = toBase12(raw);
+      resEl.value = out12;
+      // 履歴に追加
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.textContent = `${xs.trim()} ${op} ${ys.trim()} = ${out12}`;
+      histEl.prepend(div);
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      xEl.value = yEl.value = resEl.value = '';
+      histEl.innerHTML = '';
+    });
+
+    document.getElementById('copy').addEventListener('click', () => {
+      navigator.clipboard.writeText(resEl.value)
+        .then(() => alert('クリップボードにコピーしました！'))
+        .catch(() => alert('コピーに失敗しました'));
+    });
+  </script>
+</body>
+</html>
